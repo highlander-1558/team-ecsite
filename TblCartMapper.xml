@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="jp.co.internous.garnet.model.mapper.TblCartMapper">
+ 
+ 	<insert id="createTblCart">
+ 		INSERT INTO tbl_cart(user_id, product_id, product_count)
+ 		VALUES(#{userId}, #{productId}, #{productCount})
+ 	</insert>
+ 
+ 	<select id="findCartDto" resultType="jp.co.internous.garnet.model.domain.dto.CartDto">
+ 		SELECT c.id, p.product_name, p.price, p.image_full_path, c.product_count, (c.product_count * p.price) AS total
+ 		FROM tbl_cart c
+ 			INNER JOIN mst_product p
+ 			ON c.product_id = p.id
+ 		WHERE c.user_id = #{userId}
+ 		ORDER BY c.updated_at DESC, c.created_at DESC
+ 	</select>
+ 
+ 	<select id="findProduct" resultType="jp.co.internous.garnet.model.domain.TblCart">
+ 		SELECT * FROM tbl_cart
+ 		WHERE user_id = #{userId} AND product_id = #{productId}
+ 	</select>
+ 	
+ 	<update id="updateCount">
+ 		UPDATE tbl_cart SET product_count = #{productCount}, updated_at = now()
+ 		WHERE id = #{cartId}
+ 	</update>
+ 	
+ 	<update id="updateUserId">
+ 		UPDATE tbl_cart SET user_id = #{userId}
+ 		WHERE user_id = #{tmpUserId}
+ 	</update>
+ 	
+ 	<delete id="deleteTblCart">
+ 		DELETE FROM tbl_cart
+ 		WHERE id IN
+ 		<foreach item = "cartId" collection = "cartIds"
+ 		open = "(" separator = "," close = ")" >
+ 			#{cartId}
+ 		</foreach>
+ 	</delete>
+ 	
+ 	<delete id="deleteByUserId">
+ 		DELETE FROM tbl_cart
+ 		WHERE user_id = #{userId}
+ 	</delete>
+ 	
+ 	<delete id="deleteByUserIdAndProductIdAndNotId">
+ 		DELETE FROM tbl_cart
+ 		WHERE user_id = #{userId} AND product_id = #{productId} AND id != #{id}
+ 	</delete>
+ 	
+</mapper>
