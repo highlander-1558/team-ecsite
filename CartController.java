@@ -99,6 +99,17 @@ public class CartController {
 		List<TblCart> cartList = tblCartMapper.findProduct(userId, c.getProductId());
 		
 		if(cartList != null && cartList.size() > 0) {
+			int total = c.getProductCount();
+			for(TblCart cart : cartList) {
+				total += cart.getProductCount();
+			}
+			
+			TblCart cart = cartList.get(0);
+			//同一商品のデータが複数存在する場合、一つを残しその他は削除
+			if(cartList.size() > 1) {
+				tblCartMapper.deleteByUserIdAndProductIdAndNotId(cart.getUserId(), cart.getProductId(), cart.getId());
+			}
+			
 			/*
 			 * カートテーブルのデータの更新（上記でデータを取得した場合）
 			 * 呼び出すメソッドはカート情報のMapperに定義される
@@ -109,16 +120,6 @@ public class CartController {
 			 * 受け取る戻り値は、カートのデータの更新行数（1なら成功）
 			 * 
 			 */
-			int total = c.getProductCount();
-			for(TblCart cart : cartList) {
-				total += cart.getProductCount();
-			}
-			
-			TblCart cart = cartList.get(0);
-			if(cartList.size() > 1) {
-				tblCartMapper.deleteByUserIdAndProductIdAndNotId(cart.getUserId(), cart.getProductId(), cart.getId());
-			}
-			
 			tblCartMapper.updateCount(cartList.get(0).getId(), total);
 		}else {
 			/*
